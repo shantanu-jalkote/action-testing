@@ -22,7 +22,7 @@ jobs:
           echo "Fetching data from Github....."
           echo $PR_JSON
           echo "Sending data to API....."
-          curl -u :${{ secrets.TOKEN }} -H "organization: Techolution" -H "Platform: github" -H "Repo: ${{ github.repository }}" -H "Flow: normal" -H "project: javascript" -H "Content-Type: application/json" -d "$PR_JSON" ${{ vars.URL }}
+          curl -u :${{ secrets.TOKEN }} -H "organization: parinaysethtecholution" -H "Platform: github" -H "Repo: ${{ github.repository }}" -H "Flow: normal" -H "project: javascript" -H "Content-Type: application/json" -d "$PR_JSON" ${{ vars.URL }}
   job_for_manual_trigger:
     if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
