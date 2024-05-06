@@ -4,11 +4,11 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
     branches:
-      - dev
+      - main
   workflow_dispatch:
 
 env:
-  BASE: dev
+  BASE: main
 
 jobs:
   job_for_pull_request:
