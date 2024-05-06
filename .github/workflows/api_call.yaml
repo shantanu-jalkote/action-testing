@@ -1,0 +1,39 @@
+name: PR Refactor Workflow
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - dev
+  workflow_dispatch:
+
+env:
+  BASE: dev
+
+jobs:
+  job_for_pull_request:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Automated Trigger
+        run: |
+          echo "event: ${{ github.event_name }}"
+          PR_JSON=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}")
+          echo "Fetching data from Github....."
+          echo $PR_JSON
+          echo "Sending data to API....."
+          curl -u :${{ secrets.TOKEN }} -H "organization: Techolution" -H "Platform: github" -H "Repo: ${{ github.repository }}" -H "Flow: normal" -H "project: javascript" -H "Content-Type: application/json" -d "$PR_JSON" ${{ vars.URL }}
+  job_for_manual_trigger:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - name: Manual Trigger
+        run: |
+          echo "event: ${{ github.event_name }}"
+          PR_JSON=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&base=$BASE" | jq '.[0]')
+          echo "Fetching data from Github....."
+          echo $PR_JSON
+          echo "Sending data to API....."
+          curl -u :${{ secrets.TOKEN }} -H "organization: Techolution" -H "Platform: github" -H "Repo: ${{ github.repository }}" -H "Flow: normal" -H "project: javascript" -H "Content-Type: application/json" -d "$PR_JSON" ${{ vars.URL }}
