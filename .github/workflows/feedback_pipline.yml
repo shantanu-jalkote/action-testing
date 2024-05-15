@@ -30,7 +30,7 @@ jobs:
           echo "Fetching data from Github....."
           echo $COMMENT_JSON
           echo "Sending data to API....."
-          curl -u :${{ secrets.TOKEN }} -H "organization: parinaysethtecholution" -H "Platform: github" -H "Repo: ${{ github.repository }}" -H "Flow: normal" -H "SourceLanguage: Javascript" -H "Content-Type: application/json" -d "$COMMENT_JSON" ${{ vars.URL }}
+          curl -u :${{ secrets.TOKEN }} -H "organization: parinaysethtecholution" -H "Platform: github" -H "Repo: ${{ github.repository }}" -H "Flow: feedback" -H "SourceLanguage: Javascript" -H "Content-Type: application/json" -d "$COMMENT_JSON" ${{ vars.URL }}
     
   job_for_manual_trigger:
     if: ${{ github.event_name == 'workflow_dispatch' }}
