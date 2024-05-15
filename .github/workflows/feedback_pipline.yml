@@ -45,4 +45,4 @@ jobs:
           echo "Fetching data from Github....."
           echo $PR_JSON
           echo "Sending data to API....."
-          curl -u :${{ secrets.TOKEN }} -H "Platform: github" -H "SourceLanguage: Javascript" -H "Content-Type: application/json" -d "$PR_JSON" ${{ vars.URL }}
+          curl -u :${{ secrets.TOKEN }} -H "Platform: github" -H "Flow: feedback" -H "SourceLanguage: Javascript" -H "Content-Type: application/json" -d "$PR_JSON" ${{ vars.URL }}
