@@ -1,0 +1,48 @@
+name: Testing Refactor Workflow
+
+on:
+  issue_comment:
+    types: [created,edited]
+    branches: ['**']
+
+  pull_request_review_comment:
+    types: [created,edited]
+    branches: ['**']
+  
+  workflow_dispatch:
+env:
+  BASE: main
+
+jobs:
+  print_event_name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print env
+        run: echo $GITHUB_EVENT_NAME
+  job_for_comment:
+    if: ${{ github.event_name == 'issue_comment' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Request Comment Trigger
+        run: |
+          echo "event: ${{ github.event_name }}"
+          COMMENT_JSON=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}")
+          echo "Fetching data from Github....."
+          echo $COMMENT_JSON
+          echo "Sending data to API....."
+          curl -u :${{ secrets.TOKEN }} -H "organization: parinaysethtecholution" -H "Platform: github" -H "Repo: ${{ github.repository }}" -H "Flow: normal" -H "SourceLanguage: Javascript" -H "Content-Type: application/json" -d "$COMMENT_JSON" ${{ vars.URL }}
+    
+  job_for_manual_trigger:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - name: Manual Trigger for Comment in Changed Files
+        run: |
+          echo "event: ${{ github.event_name }}"
+          PR_JSON=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls/comments" | jq '.[-1]')
+          echo "Fetching data from Github....."
+          echo $PR_JSON
+          echo "Sending data to API....."
+          curl -u :${{ secrets.TOKEN }} -H "Platform: github" -H "SourceLanguage: Javascript" -H "Content-Type: application/json" -d "$PR_JSON" ${{ vars.URL }}
