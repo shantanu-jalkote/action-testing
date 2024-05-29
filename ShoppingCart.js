@@ -96,4 +96,40 @@ cart.clearCart();
 cart.displayItems();
 console.log('Total Price:', cart.getTotalPrice());
 
+// Example array of cart items
+const cartItems = [
+    { name: "Item 1", price: 29.99, quantity: 1 },
+    { name: "Item 2", price: 49.99, quantity: 2 },
+    { name: "Item 3", price: 9.99, quantity: 5 }
+];
+
+// Function to calculate the total value of the cart
+function calculateTotal(cartItems) {
+    let totalValue = 0;
+
+    cartItems.forEach(item => {
+        totalValue += item.price * item.quantity;
+    });
+
+    return totalValue.toFixed(2); // Returns the total value as a string with 2 decimal places
+}
+
+// Function to display the cart items and total value
+function displayCart(cartItems) {
+    const cartItemsDiv = document.getElementById("cart-items");
+    const totalValueSpan = document.getElementById("total-value");
+
+    cartItemsDiv.innerHTML = "";
+    cartItems.forEach(item => {
+        const itemDiv = document.createElement("div");
+        itemDiv.textContent = `${item.name} - $${item.price} x ${item.quantity}`;
+        cartItemsDiv.appendChild(itemDiv);
+    });
+
+    const totalValue = calculateTotal(cartItems);
+    totalValueSpan.textContent = totalValue;
+}
+
+// Initialize the cart display
+displayCart(cartItems);
 
