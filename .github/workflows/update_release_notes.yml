@@ -50,7 +50,10 @@ jobs:
         pr_number = event_data["pull_request"]["number"]  # PR number
         pull_request = repo.get_pull(pr_number)
 
-        # Get the base and head commits for the PR
+        # Get the base branch name
+        base_branch = pull_request.base.ref  # Base branch name
+
+        # Get the base commit for the PR
         base_commit = pull_request.base.sha  # Base branch commit
         head_commit = pull_request.head.sha    # Head branch commit
 
@@ -64,15 +67,16 @@ jobs:
 
         # Ensure release_notes.md exists and append changes
         with open("release_notes.md", "a") as release_file:
-            release_file.write(f"\n## Changes in PR #{pr_number}:\n")
+            release_file.write(f"\n## Changes from PR #{pr_number}:\n")
             release_file.write("\n".join(changes) + "\n")
 
         EOF
 
-    - name: Commit changes
+    - name: Commit changes to the base branch
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git checkout ${GITHUB_REF#refs/heads/}  # Check out the base branch
         git add release_notes.md
         git commit -m "Update release notes for PR #${{ github.event.pull_request.number }}"
-        git push
+        git push origin ${GITHUB_REF#refs/heads/}  # Push changes directly to the base branch
