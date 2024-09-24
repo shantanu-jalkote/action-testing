@@ -1,0 +1,74 @@
+name: Capture PR Differences
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize  # Triggers when new commits are pushed to the PR
+
+jobs:
+  capture_pr_differences:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: pip install PyGithub
+
+    - name: Capture PR differences
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_EVENT_PATH: ${{ github.event_path }}
+      run: |
+        python - <<EOF
+        import os
+        import json
+        from github import Github
+
+        # Automatically get repository details from environment variables
+        repository = os.getenv('GITHUB_REPOSITORY')  # This will be in the form 'owner/repo_name'
+        owner, repo_name = repository.split('/')
+
+        # GitHub token (automatically provided by GitHub Actions)
+        access_token = os.getenv('GITHUB_TOKEN')
+
+        # Create a GitHub instance
+        gh = Github(access_token)
+        repo = gh.get_repo(f"{owner}/{repo_name}")
+
+        # Get the pull request details
+        event_data = json.load(open(os.getenv('GITHUB_EVENT_PATH')))
+        pr_number = event_data["pull_request"]["number"]  # PR number
+        pull_request = repo.get_pull(pr_number)
+
+        # Get the diff of the pull request
+        diff = pull_request.diff()
+
+        # Create a list to hold the changes
+        changes = []
+        for file in diff:
+            changes.append(f"- {file.filename} (+{file.additions}/-{file.deletions})")
+
+        # Append changes to release_notes.md
+        with open("release_notes.md", "a") as release_file:
+            release_file.write(f"\n## Changes in PR #{pr_number}:\n")
+            release_file.write("\n".join(changes))
+
+        EOF
+
+    - name: Commit changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add release_notes.md
+        git commit -m "Update release notes for PR changes"
+        git push
