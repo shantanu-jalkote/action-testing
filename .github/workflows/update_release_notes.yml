@@ -51,7 +51,7 @@ jobs:
         pull_request = repo.get_pull(pr_number)
 
         # Get the diff of the pull request
-        diff = pull_request.diff()
+        diff = pull_request.get_diff() 
 
         # Create a list to hold the changes
         changes = []
