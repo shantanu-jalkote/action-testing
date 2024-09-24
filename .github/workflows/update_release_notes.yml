@@ -50,18 +50,22 @@ jobs:
         pr_number = event_data["pull_request"]["number"]  # PR number
         pull_request = repo.get_pull(pr_number)
 
-        # Get the diff of the pull request
-        diff = pull_request.get_diff() 
+        # Get the base and head commits for the PR
+        base_commit = pull_request.base.sha  # Base branch commit
+        head_commit = pull_request.head.sha    # Head branch commit
+
+        # Compare the two commits
+        comparison = repo.compare(base_commit, head_commit)
 
         # Create a list to hold the changes
         changes = []
-        for file in diff:
+        for file in comparison.files:
             changes.append(f"- {file.filename} (+{file.additions}/-{file.deletions})")
 
-        # Append changes to release_notes.md
+        # Ensure release_notes.md exists and append changes
         with open("release_notes.md", "a") as release_file:
             release_file.write(f"\n## Changes in PR #{pr_number}:\n")
-            release_file.write("\n".join(changes))
+            release_file.write("\n".join(changes) + "\n")
 
         EOF
 
@@ -70,5 +74,5 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add release_notes.md
-        git commit -m "Update release notes for PR changes"
+        git commit -m "Update release notes for PR #${{ github.event.pull_request.number }}"
         git push
