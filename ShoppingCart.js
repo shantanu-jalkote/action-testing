@@ -16,18 +16,7 @@ class ShoppingCart {
     }
   }
 
-  getTotalPrice() {
-    let totalPrice = 0;
-    for (const item of this.items) {
-      totalPrice += item.price;
-    }
-    return totalPrice - this.discount;
-  }
-
-  applyDiscount(amount) {
-    this.discount = amount;
-  }
-
+  
   displayItems() {
     console.log('Shopping Cart Items:');
     this.items.forEach((item, index) => {
